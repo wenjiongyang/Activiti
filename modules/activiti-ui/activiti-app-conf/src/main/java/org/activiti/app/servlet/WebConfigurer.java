@@ -52,7 +52,10 @@ public class WebConfigurer implements ServletContextListener {
         AnnotationConfigWebApplicationContext rootContext = null;
         
         if (context == null) {
+            // 当context为空时, 构建了一个根容器
             rootContext = new AnnotationConfigWebApplicationContext();
+
+            // 注册配置类是: ApplicationConfiguration.class
             rootContext.register(ApplicationConfiguration.class);
             
             if (rootContext.getServletContext() == null) {
@@ -68,12 +71,13 @@ public class WebConfigurer implements ServletContextListener {
               rootContext.setServletContext(servletContext);
             }
         }
-        
+        // 与L62 L71 代码类似, servlet 和 spring context做了双向绑定
         servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, rootContext);
 
         EnumSet<DispatcherType> disps = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.ASYNC);
-
+        // 初始化spring相关
         initSpring(servletContext, rootContext);
+        // 初始化spring安全相关
         initSpringSecurity(servletContext, disps);
 
         log.debug("Web application fully configured");
@@ -86,6 +90,7 @@ public class WebConfigurer implements ServletContextListener {
         log.debug("Configuring Spring Web application context");
         AnnotationConfigWebApplicationContext appDispatcherServletConfiguration = new AnnotationConfigWebApplicationContext();
         appDispatcherServletConfiguration.setParent(rootContext);
+        // 注册 app 子容器
         appDispatcherServletConfiguration.register(AppDispatcherServletConfiguration.class);
 
         log.debug("Registering Spring MVC Servlet");
@@ -98,6 +103,7 @@ public class WebConfigurer implements ServletContextListener {
         log.debug("Registering Activiti public REST API");
         AnnotationConfigWebApplicationContext apiDispatcherServletConfiguration = new AnnotationConfigWebApplicationContext();
         apiDispatcherServletConfiguration.setParent(rootContext);
+        // 注册 api 子容器
         apiDispatcherServletConfiguration.register(ApiDispatcherServletConfiguration.class);
 
         ServletRegistration.Dynamic apiDispatcherServlet = servletContext.addServlet("apiDispatcher",

@@ -55,6 +55,7 @@ public class AppDispatcherServletConfiguration extends WebMvcConfigurationSuppor
     @Bean
     public LocaleChangeInterceptor localeChangeInterceptor() {
         log.debug("Configuring localeChangeInterceptor");
+        // 获取语言信息, 设置到参数里
         LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
         localeChangeInterceptor.setParamName("language");
         return localeChangeInterceptor;
@@ -63,6 +64,7 @@ public class AppDispatcherServletConfiguration extends WebMvcConfigurationSuppor
     @Bean
     public MultipartResolver multipartResolver() {
         CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+        // 设置文件上传 最大的size
         multipartResolver.setMaxUploadSize(environment.getProperty("file.upload.max.size", Long.class));
         return multipartResolver;
     }
@@ -71,7 +73,9 @@ public class AppDispatcherServletConfiguration extends WebMvcConfigurationSuppor
     public RequestMappingHandlerMapping requestMappingHandlerMapping() {
         log.debug("Creating requestMappingHandlerMapping");
         RequestMappingHandlerMapping requestMappingHandlerMapping = new RequestMappingHandlerMapping();
+        // 是否使用后缀匹配, springMVC不考虑
         requestMappingHandlerMapping.setUseSuffixPatternMatch(false);
+        // 不移除分号, 保留原来的url
         requestMappingHandlerMapping.setRemoveSemicolonContent(false);
         Object[] interceptors = {localeChangeInterceptor()};
         requestMappingHandlerMapping.setInterceptors(interceptors);
@@ -83,6 +87,7 @@ public class AppDispatcherServletConfiguration extends WebMvcConfigurationSuppor
         addDefaultHttpMessageConverters(converters);
         for (HttpMessageConverter<?> converter: converters) {
             if (converter instanceof MappingJackson2HttpMessageConverter) {
+                // json 转换的配置
                 MappingJackson2HttpMessageConverter jackson2HttpMessageConverter = (MappingJackson2HttpMessageConverter) converter;
                 jackson2HttpMessageConverter.setObjectMapper(objectMapper);
                 break;
